@@ -510,7 +510,7 @@ def main(argv: list[str] | None = None) -> int:
         out_path = Path(args.output)
     else:
         stamp = datetime.now().strftime("%d_%B%Y_%H%M%S")
-        out_path = Path("results") / f"nse_screen_results_{stamp}.csv"
+        out_path = Path("results") / "weekly" / f"nse_screen_results_{stamp}.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     results.to_csv(out_path, index=False)
     log.info("Saved %d row(s) to %s", len(results), out_path.resolve())
