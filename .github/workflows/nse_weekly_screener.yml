@@ -26,18 +26,19 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run screener
-        run: python nse_weekly_screener.py
+        run: |
+          mkdir -p results/weekly
+          python nse_weekly_screener.py --output results/weekly/nse_screen_results_$(date -u +'%d_%B%Y_%H%M%S').csv
 
       - name: Commit results CSV back to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add results/nse_screen_results_*.csv
+          git add results/weekly/nse_screen_results_*.csv
           if git diff --cached --quiet; then
             echo "No new results to commit."
           else
-            git commit -m "Screener results $(date -u +'%Y-%m-%d %H:%M UTC')"
-            # Rebase onto any commits pushed while this job was running.
+            git commit -m "Weekly screener results $(date -u +'%Y-%m-%d %H:%M UTC')"
             git pull --rebase origin main
             git push
           fi
@@ -45,6 +46,6 @@ jobs:
       - name: Upload results as artifact
         uses: actions/upload-artifact@v5
         with:
-          name: screen-results
-          path: results/nse_screen_results_*.csv
+          name: weekly-screen-results
+          path: results/weekly/nse_screen_results_*.csv
           retention-days: 30
