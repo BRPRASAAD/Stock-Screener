@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: stock-screener-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   screen:
     runs-on: ubuntu-latest

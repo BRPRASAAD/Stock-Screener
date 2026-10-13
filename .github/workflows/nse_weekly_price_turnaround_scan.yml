@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write          # needed to commit the results CSV back to the repo
 
+concurrency:
+  group: stock-screener-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   screen:
     runs-on: ubuntu-latest
