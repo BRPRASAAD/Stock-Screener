@@ -1,0 +1,20 @@
+name: Test Schedule Run
+
+on:
+  schedule:
+    # Every day at 22:15 IST = 16:45 UTC
+    - cron: "45 16 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print current time
+        run: |
+          echo "Workflow triggered at $(date -u +'%Y-%m-%d %H:%M UTC')"
+          echo "This is a test workflow to confirm scheduled execution is working."
