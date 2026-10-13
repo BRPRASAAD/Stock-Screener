@@ -2,8 +2,8 @@ name: Test Schedule Run
 
 on:
   schedule:
-    # Every day at 22:26 IST = 16:56 UTC
-    - cron: "56 16 * * *"
+    # Every 2 minutes for testing automatic execution
+    - cron: "*/2 * * * *"
   workflow_dispatch: {}
 
 permissions:
