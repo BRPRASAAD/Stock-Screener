@@ -8,15 +8,15 @@ technical and volume conditions.
 
 A stock passes a given week only if ALL of the following are true:
 
-    1. Weekly RSI(14) >= 60
-    2. Weekly Volume > 1 week ago Close
-    3. Weekly ADX(14) > 15
-    4. 1 week ago Volume >= 2 weeks ago Volume * 0.5
-    5. Weekly Volume > SMA(Weekly Volume, 20)
-    6. Weekly Close > 1 week ago Close
-    7. Weekly Close > EMA(Weekly Close, 20) * 0.7
-    8. Weekly Volume > 1,000,000
-    9. EMA(Weekly Close, 20) > EMA(Weekly Close, 100)
+    1. Weekly RSI(14) >= 50
+    2. Weekly ADX(14) > 20
+    3. Weekly Volume >= Weekly SMA(Weekly Volume, 20)
+    4. Weekly Volume > 1 week ago Volume
+    5. 1 week ago Volume >= 2 weeks ago Volume
+    6. Weekly Close > Weekly EMA(Weekly Close, 20)
+    7. Weekly Close >= 1 week ago Close
+    8. Weekly EMA(Weekly Close, 20) >= Weekly EMA(Weekly Close, 50)
+    9. Weekly EMA(Weekly Close, 50) > Weekly EMA(Weekly Close, 100)
 
 Output columns: date, stock_name, ticker  (saved to CSV as well).
 
@@ -271,22 +271,18 @@ def compute_indicators(df_weekly: pd.DataFrame) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 
 def apply_filters(df_weekly: pd.DataFrame) -> pd.Series:
-    """Return a boolean Series: True where ALL 9 weekly conditions hold.
-
-    Condition 2 is implemented exactly as specified even though the units
-    differ (volume vs. price).
-    """
+    """Return a boolean Series: True where ALL 9 weekly price-turnaround conditions hold."""
     df = df_weekly
     conditions = [
-        df["rsi_14"] >= 60,                              # 1
-        df["Volume"] > df["close_lag1"],                 # 2 (exactly as written)
-        df["adx_14"] > 15,                               # 3
-        df["vol_lag1"] >= df["vol_lag2"] * 0.5,          # 4
-        df["Volume"] > df["vol_sma_20"],                 # 5
-        df["Close"] > df["close_lag1"],                  # 6
-        df["Close"] > df["ema_20"] * 0.7,                # 7
-        df["Volume"] > VOLUME_THRESHOLD,                 # 8
-        df["ema_20"] > df["ema_100"],                    # 9
+        df["rsi_14"] >= 50,                             # 1
+        df["adx_14"] > 20,                              # 2
+        df["Volume"] >= df["vol_sma_20"],               # 3
+        df["Volume"] > df["vol_lag1"],                  # 4
+        df["vol_lag1"] >= df["vol_lag2"],               # 5
+        df["Close"] > df["ema_20"],                     # 6
+        df["Close"] >= df["close_lag1"],                # 7
+        df["ema_20"] >= df["ema_50"],                   # 8
+        df["ema_50"] > df["ema_100"],                   # 9
     ]
     mask = conditions[0]
     for cond in conditions[1:]:
