@@ -2,8 +2,8 @@ name: NSE Bullish Daily Reversal Scan
 
 on:
   schedule:
-    # Every day at 20:15 IST = 14:45 UTC (cron is always UTC)
-    - cron: "45 14 * * *"
+    # Every day at ~16:03 IST = 10:33 UTC (cron is always UTC)
+    - cron: "33 10 * * *"
   workflow_dispatch: {}
 
 permissions:
