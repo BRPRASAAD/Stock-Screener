@@ -31,14 +31,14 @@ jobs:
 
       - name: Run bullish daily reversal scan
         run: |
-          mkdir -p results/daily
-          python strategies/nse_bullish_daily_reversal_scan.py --output results/daily/nse_bullish_daily_reversal_results_$(date -u +'%d_%B%Y_%H%M%S').csv
+          mkdir -p results/daily/reversal
+          python strategies/nse_bullish_daily_reversal_scan.py --output results/daily/reversal/$(date -u +'%d_%B%Y_%H%M%S')_nse_bullish_daily_reversal_results.csv
 
       - name: Commit results CSV back to repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add results/daily/nse_bullish_daily_reversal_results_*.csv
+          git add results/daily/reversal/*_nse_bullish_daily_reversal_results.csv
           if git diff --cached --quiet; then
             echo "No new results to commit."
           else
@@ -51,5 +51,5 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: bullish-daily-results
-          path: results/daily/nse_bullish_daily_reversal_results_*.csv
+          path: results/daily/reversal/*_nse_bullish_daily_reversal_results.csv
           retention-days: 30
