@@ -46,6 +46,7 @@ from pandas.tseries.offsets import DateOffset
 NSE_EQUITY_LIST_URL = "https://archives.nseindia.com/content/equities/EQUITY_L.csv"
 
 MIN_WEEKLY_CANDLES = 100          # need >= 100 weekly bars for EMA(50)
+MIN_DAILY_BARS = MIN_WEEKLY_CANDLES  # compatibility with daily-scan logging and checks
 VOLUME_THRESHOLD = 500_000         # kept for compatibility with earlier fetch logic
 RSI_PERIOD = 14
 ADX_PERIOD = 14
@@ -172,6 +173,30 @@ def fetch_ohlcv(
                 time.sleep(backoff * attempt)
     log.warning("Giving up on %s after %d attempts", ticker, retries)
     return None
+
+
+# --------------------------------------------------------------------------- #
+# Weekly resampling
+# --------------------------------------------------------------------------- #
+
+def to_weekly(df: pd.DataFrame) -> pd.DataFrame:
+    """Resample daily OHLCV to weekly bars (week ending Friday).
+
+    If Friday is an exchange holiday the bar naturally ends on the last
+    trading day of that week because resampling bins actual observations.
+    """
+    weekly = df.resample("W-FRI").agg(
+        {
+            "Open": "first",
+            "High": "max",
+            "Low": "min",
+            "Close": "last",
+            "Volume": "sum",
+        }
+    )
+    weekly = weekly.dropna(subset=["Close"])
+    weekly["Volume"] = weekly["Volume"].fillna(0)
+    return weekly
 
 
 # --------------------------------------------------------------------------- #
@@ -364,7 +389,7 @@ def run_screen(
     log.info("Validation counts:")
     log.info("  universe size ................ %d", total)
     log.info("  symbols with data fetched .... %d", fetched)
-    log.info("  symbols with >= %d daily bars ... %d", MIN_DAILY_BARS, enough_history)
+    log.info("  symbols with >= %d weekly bars ... %d", MIN_WEEKLY_CANDLES, enough_history)
     log.info("  total passing rows ........... %d", len(results))
 
     out = pd.DataFrame(results, columns=RESULT_COLUMNS)
